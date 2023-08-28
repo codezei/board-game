@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade4</title>
+    <link rel="stylesheet" href="css/main.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="screen">
+        <header class="header">
+            <div class="container">
+                <div class="header__inner">
+                    <img src="images/logo.svg" alt="" class="logo">
+                    <button class="btn btn--inversion js-open-popup" data-popup="rules">Правила</button>
+                </div>
+            </div>
+        </header>
+        <main class="main">
+
+            <div class="container main__container">
+                <div class="slide active tcenter" data-slide="0">
+                    <h2 class="title">Добро пожаловать в деревню Тал Раша, найди свои сокровища прямо здесь!</h2>
+                    <button class="btn js-next-slide" data-next-slide="1">Да, хочу сыграть</button>
+                </div>
+                <div class="slide" data-slide="1">
+                    <h2 class="title">Выбери свою роль в этой игре</h2>
+                    <div class="roles">
+                        <div class="role js-next-slide" data-role="0" data-next-slide="2">
+                            <div class="role__info">
+                                <div>
+                                    <h3 class="role__name">Медик</h3>
+                                    <div class="role__description">+1 жизнь</div>
+                                </div>
+                                <img src="images/role-1.png" alt="" class="role__img">
+                            </div>
+                        </div>
+                        <div class="role js-next-slide" data-role="1" data-next-slide="2">
+                            <div class="role__info">
+                                <img src="images/role-2.png" alt="" class="role__img">
+                                <div>
+                                    <h3 class="role__name">Фокусник</h3>
+                                    <div class="role__description">Возможность проверить
+                                        комнату без уравнения</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="role js-next-slide" data-role="2" data-next-slide="2">
+                            <div class="role__info">
+                                <div>
+                                    <h3 class="role__name">Военный</h3>
+                                    <div class="role__description">Использовать прибор
+                                        ночного виденья</div>
+                                </div>
+                                <img src="images/role-3.png" alt="" class="role__img">
+                            </div>
+                        </div>
+                        <div class="role js-next-slide" data-role="3" data-next-slide="2">
+                            <div class="role__info">
+                                <img src="images/role-4.png" alt="" class="role__img">
+                                <div>
+                                    <h3 class="role__name">Офицер</h3>
+                                    <div class="role__description">Дополнительный ход</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slide" data-slide="2">
+
+                    <div class="slide__row">
+                        <div class="slide__col align-bottom">
+                            <div class="logger">
+                                <img src="images/info.png" alt="" class="logger__icon">
+                                <div class="logger__list">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slide__col">
+                            <div class="labyrinth-wrapper">
+
+                            </div>
+                            <div class="health">
+                                <div class="health__indicator">Состояние черепа:&nbsp;<span class="js-health-state"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="slide__col align-center">
+                            <div class="navigation">
+                                <div class="navigation__row">
+                                    <button class="navigation__btn js-move-btn" data-move="up">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
+                                            fill="currentColor" class="bi bi-chevron-up" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd"
+                                                d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="navigation__row">
+                                    <button class="navigation__btn js-move-btn" data-move="left">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
+                                            fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd"
+                                                d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" />
+                                        </svg>
+                                    </button>
+                                    <button class="navigation__btn js-inspection-btn">
+                                        <img src="images/magnifer.png" alt="">
+                                    </button>
+                                    <button class="navigation__btn js-move-btn" data-move="right">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
+                                            fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd"
+                                                d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="navigation__row">
+                                    <button class="navigation__btn js-move-btn" data-move="down">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
+                                            fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
+                                            <path fill-rule="evenodd"
+                                                d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+                <div class="popup popup--small" data-popup="item">
+                    <button class="popup__close">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-x-lg" viewBox="0 0 16 16">
+                            <path
+                                d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
+                        </svg>
+                    </button>
+    
+                    <div class="popup__inner">
+                        <h3 class="popup__title">
+                            Вы обнаружили предмет
+                        </h3>
+                        <div class="item briefcase">
+    
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="popup popup--small" data-popup="puzzle">
+    
+                    <button class="popup__close">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-x-lg" viewBox="0 0 16 16">
+                            <path
+                                d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
+                        </svg>
+                    </button>
+    
+                    <div class="popup__inner">
+                        <h3 class="popup__title">
+                            Решите уравнение, чтобы найти сокровище
+                        </h3>
+                        <div class="puzzle">
+                            <span class="js-puzzle-operand-first puzzle__item"></span>
+                            <span class="js-puzzle-operator puzzle__item"></span>
+                            <span class="js-puzzle-operand-second puzzle__item"></span> 
+                            <span class="puzzle__item">=</span>
+                            
+                            <input type="text" class="js-puzzle-answer puzzle__answer" placeholder="Введите ответ">
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="popup" data-popup="rules">
+    
+                    <button class="popup__close">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-x-lg" viewBox="0 0 16 16">
+                            <path
+                                d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
+                        </svg>
+                    </button>
+    
+                    <div class="popup__inner">
+                        <div class="rules">
+                            <h3 class="rules__title">
+                                Легенда:
+                            </h3>
+                            <p>
+                                В деревне Тал Раша существуют мирные люди. Раньше это была торговая деревня, с сотней жителей, но из-за индустриализации все разъехались, и в деревне живет совсем немного жителей:
+                            </p>
+                            <p>
+                                шериф Тираель и его гвардия
+                            </p>
+                            <p>
+                                медик Акара
+                            </p>
+                            <p>
+                                офицер Дрогнан 
+                            </p>
+                            <p>
+                                военный Мешиф
+                            </p>
+                            <p>фокусник Соркесс</p>
+                            <p>
+                                Со времен войны орков против людей в городе существует подземелье, которое позволяло жителям тайно покидать свои дома во время войны, чтобы сохранить свои жизни, но последняя война была очень давно. А после войны во времена сухого закона через подземелье в город тайно проносили контрабанду. 
+                            </p>
+                            <p>
+                                Ходят легенды, что во времена сухого закона в тоннеле поймали разбойников, и убили их там, а сокровища их награбленное сокровище спрятали. С тех пор сокровища считаются проклятыми, т.к. их охраняют духи бандитов. Некоторые люди предпринимали попытки найти сокровища, кто-то был пойман шерифом и охраной и арестован, а кто-то был найден мертвым. 
+                            </p>
+                            <p>
+                                За подземельем закрепилась плохая репутация, его прозвали “Логово Зла”.
+                            </p>
+                            <p>
+                                Тираель взял под охрану это подземелье, выставил конвой и никого туда не пускает. Все же возможность туда есть, ротация происходит раз в сутки, и занимает всего 40 секунд. За это время можно испытать свою удачу и попробовать проскользнуть в подземелье.
+                            </p>
+                            <p>
+                                Успехов!
+                            </p>
+                            <br>
+                            <h3 class="rules__title">
+                                Правила:
+                            </h3>
+                            <p>
+                                Правила игры:
+                                <br>
+                                Нужно выбрать персонажа (у каждого персонажа есть своя особенность), которым вы хотите сыграть в игру:
+                            </p>
+                            <ul>
+                                <li>Офицер: видит на 1 клеточку дальше</li>
+                                <li>Медик: + 1 жизнь</li>
+                                <li>Военный: использовать прибор ночного видения</li>
+                                <li>Фокусник: возможность проверить комнату без уравнения</li>
+                            </ul>
+                            <p>
+                                После выбора персонажа игра начинается.<br>
+Игра начинается в подземелье: суть игры состоит в том, чтобы дойти до конца лабиринта и найти все сокровища.<br>
+В процессе игры вам предстоит найти предметы, которые расположены в определенных участках карты.
+                            </p>
+                            <h3 class="rules__title">
+                                Базовые действия
+                            </h3>
+                            <p class="yellow">
+                                Навигационная панель:
+                            </p>
+                            <p>
+                                Игроку доступна панель для перемещения, сразу не виден весь лабиринт вам нужно будет идти по комнатам (1 квадратик на карте лабиринта = 1 комната), нужно перемещаться строго по коридору, одна попытка не туда считается ударом головой об стену, после 5 ударов головой об стену ваш персонаж теряет сознание и умирает. Игра заканчивается.
+                            </p>
+                            <div class="bg">
+                                <div class="navigation">
+                                    <div class="navigation__row">
+                                        <button class="navigation__btn" data-move="up">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
+                                                fill="currentColor" class="bi bi-chevron-up" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd"
+                                                    d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="navigation__row">
+                                        <button class="navigation__btn" data-move="left">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
+                                                fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd"
+                                                    d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" />
+                                            </svg>
+                                        </button>
+                                        <button class="navigation__btn">
+                                            <img src="images/magnifer.png" alt="">
+                                        </button>
+                                        <button class="navigation__btn" data-move="right">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
+                                                fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd"
+                                                    d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="navigation__row">
+                                        <button class="navigation__btn" data-move="down">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"
+                                                fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 16 16">
+                                                <path fill-rule="evenodd"
+                                                    d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <p>
+                                В навигационной панели есть кнопка “Осмотреть комнату” (в виде лупы), которая позволяет проверить наличие предметов в вашей и соседних комнатах. У этой кнопки есть лимит использования - 6 раз, после чего она становится неактивной.
+                            </p>
+                            <p class="yellow">
+                                Существует шкала повреждений головы а также индикация: 
+                            </p>
+                            <ul>
+                                <li>Целехонький</li>
+                                <li>Небольшая шишка</li>
+                                <li>Гематома с кулак</li>
+                                <li>Сотрясение мозга</li>
+                                <li>Разбит</li>
+                            </ul>
+                            <div class="bg">
+                                <div class="health">
+                                    <div class="health__indicator health__indicator--0">Состояние черепа:&nbsp;<span>Легкий ушиб</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <p>
+                                Кнопка использовать особенность персонажа.
+У каждого персонажа есть особенность, которая применение которой помогает ему на протяжении всей игры. 
+                            </p>
+                            <p class="yellow">
+                                Существует несколько вариантов концовки игры:
+                            </p>
+                            <ul>
+                                <li>
+                                    Вы можете умереть во время игры так и не дойдя до конца в случае если потеряете сознание.
+                                </li>
+                                <li>
+                                    Вы можете потеряться в темноте и потерять сознание и умереть
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+        <footer class="footer">
+            <div class="container">
+
+            </div>
+        </footer>
+
+
+    </div>
+
+
+
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>
