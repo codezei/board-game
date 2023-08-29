@@ -45,9 +45,10 @@ const roleControl = {
         });
     },
     setActiveRoleHandler(e) {
-        this.activeRole = this.roles[+e.currentTarget.dataset.role];
+        this.activeRole = {...this.roles[+e.currentTarget.dataset.role], treasures: []};
         healthControl.init();
         loggerControl.addMessage(`Вы выбрали персонаж: ${this.activeRole.name}`)
+        console.log(this.activeRole)
     },
     foundFlashlight () {
         this.activeRole.flashlight = true
@@ -106,7 +107,6 @@ const levelsState = {
                         opened: false, 
                         useItem(){
                             this.opened = true
-                            
                             itemControl.createItem(this.id)
                             gameProcess.changeLevel(1)
                             loggerControl.addMessage(`Вы вернулись на первый уровень`)
@@ -289,9 +289,9 @@ const levelsState = {
                             gridControl.updateGrid()
                         },
                         openItem(){
-                            if (!this.opened && !roleControl.activeRole.solution) {
+                            if (!roleControl.activeRole.solution) {
                                 puzzleControl.createPuzzle(this.useItem.bind(this))
-                            } else if (!this.opened && roleControl.activeRole.solution) {
+                            } else if (roleControl.activeRole.solution) {
                                 this.useItem()
                             }
                         }
@@ -379,7 +379,7 @@ const gridControl = {
             });
             this.wrapper.append(levelHtml);
         });
-        loggerControl.addMessage(`Вы начали игру`)
+        
     },
     updateGrid() {
         this.state.levels.forEach((levelItem, levelIndex)=>{
@@ -388,13 +388,16 @@ const gridControl = {
                 levelItem.forEach((rowItem, rowIndex) => {
                     rowItem.forEach((colItem, colIndex) => {
                         colItem && colItem.open && this.wrapper.children[this.state.activeLevel].children[rowIndex].children[colIndex].classList.add("open");
+                        colItem && !colItem.open && this.wrapper.children[this.state.activeLevel].children[rowIndex].children[colIndex].classList.remove("open");
                         colItem && colItem.open && colItem.item && colItem.item.opened && this.wrapper.children[this.state.activeLevel].children[rowIndex].children[colIndex].classList.add(colItem.item.id);
+                        colItem && colItem.open && colItem.item && !colItem.item.opened && this.wrapper.children[this.state.activeLevel].children[rowIndex].children[colIndex].classList.remove(colItem.item.id);
                         colItem && !colItem.target && this.wrapper.children[this.state.activeLevel].children[rowIndex].children[colIndex].classList.remove("target");
                         colItem && colItem.target && this.wrapper.children[this.state.activeLevel].children[rowIndex].children[colIndex].classList.add("target");
                     });
                 });
             }
         })
+
     },
 };
 
@@ -411,9 +414,10 @@ const healthControl = {
     value: 0,
     storage: document.querySelector(".js-health-state"),
     setDescription () {
-        console.log(this.role)
         if (this.role.activeRole.id === "medic") {
             this.description = [...this.description, ...this.description,]
+        } else {
+            this.description = [...this.description]
         }
     },
     setHealthState() {
@@ -422,17 +426,18 @@ const healthControl = {
         setTimeout(function() {
             this.storage.parentElement.classList.add('animate')
         }.bind(this), 11)
-        loggerControl.addMessage(`Ваше здоровья изменилось до: ${this.description[this.value]}`)
+        loggerControl.addMessage(`Ваше здоровья установленно до: ${this.description[this.value]}`)
     },
     updateHealthState() {
         this.value++;
         this.setHealthState();
         if (this.value === this.description.length - 1) {
             loggerControl.addMessage(`Вы погибли`)
-            gameProcess.gameOver()
+            gameControl.gameOver()
         }
     },
     init () {
+        this.value = 0
         this.setDescription()
         this.setHealthState()
     }
@@ -457,16 +462,40 @@ const navigationControl = {
     },
 };
 
+const gameControl = {
+    btnRestart: document.querySelector('.js-game-restart'),
+    finish: false,
+    gameStart () {
+        gameProcess.init()
+        levelsState.changeActiveLevel(1);
+        gridControl.updateGrid()
+        loggerControl.addMessage(`Вы начали игру`)
+    },
+    gameRestart () {
+        this.finish = false
+        popupControl.closePopupHandler()
+        slideControl.setActiveSlide(1)
+        this.gameStart()
+    },
+    gameOver() {
+        this.finish = true
+        loggerControl.addMessage(`Игра окончена`)
+        resultControl.showResult()
+        popupControl.openPopup('result')
+        
+    },
+    init() {
+        this.btnRestart.addEventListener('click', this.gameRestart.bind(this))
+        this.gameStart()
+    }
+}
+
 const gameProcess = {
     state: levelsState,
     inspectionAttempts: 6,
-    finish: false,
-    gameOver() {
-        this.finish = true
-        loggerControl.addMessage(`Конец игры`)
-    },
+    finish: gameControl.finish,
     findTarget (levels) {
-        if (this.finish) return
+        if (gameControl.finish) return
         let foundItem = {}
         levels.forEach((levelItem, levelIndex)=>{
                 if (levelIndex === this.state.activeLevel) {
@@ -486,7 +515,7 @@ const gameProcess = {
         return foundItem
     },
     changeTarget(direction) {
-        if (this.finish) return
+        if (gameControl.finish) return
         let newState = [...this.state.levels]
         let {levelIndex, rowIndex, colIndex, colItem} = this.findTarget(newState)
         let loggerScheme = {
@@ -495,7 +524,6 @@ const gameProcess = {
             left: "влево",
             right: "вправо"
         }
-
         if (colItem.moves.includes(direction)) {
             colItem.target = false
             if (direction === "up") {
@@ -505,7 +533,7 @@ const gameProcess = {
                 loggerControl.addMessage(`Успешное перемещение ${loggerScheme[direction]}`)
                 if (newState[levelIndex][rowIndex - 1][colIndex].end) {
                     loggerControl.addMessage(`Вы нашли конец лабиринта`)
-                    this.gameOver()
+                    gameControl.gameOver()
                     
                 }
             } else if (direction === "down") {
@@ -515,7 +543,7 @@ const gameProcess = {
                 loggerControl.addMessage(`Успешное перемещение ${loggerScheme[direction]}`)
                 if (newState[levelIndex][rowIndex + 1][colIndex].end) {
                     loggerControl.addMessage(`Вы нашли конец лабиринта`)
-                    this.gameOver()
+                    gameControl.gameOver()
                 }
             } else if (direction === "left") {
                 newState[levelIndex][rowIndex][colIndex - 1].target = true
@@ -524,7 +552,7 @@ const gameProcess = {
                 loggerControl.addMessage(`Успешное перемещение ${loggerScheme[direction]}`)
                 if (newState[levelIndex][rowIndex][colIndex - 1].end) {
                     loggerControl.addMessage(`Вы нашли конец лабиринта`)
-                    this.gameOver()
+                    gameControl.gameOver()
                 }
             } else if (direction === "right") {
                 newState[levelIndex][rowIndex][colIndex + 1].target = true
@@ -533,7 +561,7 @@ const gameProcess = {
                 loggerControl.addMessage(`Успешное перемещение ${loggerScheme[direction]}`)
                 if (newState[levelIndex][rowIndex][colIndex + 1].end) {
                     loggerControl.addMessage(`Вы нашли конец лабиринта`)
-                    this.gameOver()
+                    gameControl.gameOver()
                 }
             }
         } else {
@@ -567,6 +595,7 @@ const gameProcess = {
                 })
             }
         })
+        this.state.setState(newState);
     },
     lightOn () {
         let newState = [...this.state.levels]
@@ -581,9 +610,10 @@ const gameProcess = {
                 })
             }
         })
+        this.state.setState(newState);
     },
     inspectionTarget () {
-        if (this.finish) return
+        if (gameControl.finish) return
         if (this.inspectionAttempts === 0) {
             loggerControl.addMessage(`У вас не осталось попыток`)
             return
@@ -596,6 +626,29 @@ const gameProcess = {
         this.state.setState(newState);
         this.inspectionAttempts = this.inspectionAttempts - 1
         loggerControl.addMessage(`Вы иследовали комнату. Осталось ${this.inspectionAttempts} попыток`)
+    },
+    init () {
+        this.inspectionAttempts = 6;
+        let newState = [...this.state.levels];
+        newState.forEach((levelItem, levelIndex)=>{
+            levelItem.forEach((rowItem, rowIndex)=>{
+                rowItem.forEach((colItem, colIndex)=>{
+                    if (colItem) {
+                        colItem.open = false
+                        colItem.target = false
+                        if (colItem.item) {
+                            colItem.item.opened = false
+                        }
+                        if (colItem.start) {
+                            colItem.target = true
+                            colItem.open = true
+                        }
+                    }
+
+                })
+            })
+        })
+        this.state.setState(newState)
     }
 };
 
@@ -608,6 +661,11 @@ const slideControl = {
         this.buttons.forEach((button) => {
             button.addEventListener("click", this.switchSlideHandler.bind(this));
         });
+    },
+    setActiveSlide (activeSlide) {
+        this.activeSlide.classList.remove("active");
+        this.slides[activeSlide].classList.add("active");
+        this.activeSlide = this.slides[activeSlide];
     },
 
     switchSlideHandler(e) {
@@ -659,6 +717,30 @@ const popupControl = {
 
     init() {
         this.addListeners();
+    }
+}
+
+const resultControl = {
+    list: document.querySelector('.treasures'),
+    showResult () {
+        
+        if (roleControl.activeRole.treasures.length) {
+            console.log(roleControl.activeRole)
+            let container = document.createElement('div')
+            container.classList.add('treasures')
+            container.innerHTML = "Вы нашли:"
+            roleControl.activeRole.treasures.forEach((treasure)=>{
+                let treasureItem = document.createElement('div')
+                treasureItem.classList.add(treasure.id)
+                treasureItem.classList.add('treasure__item')
+                treasureItem.innerHTML = treasure.name
+                container.append(treasureItem)
+            })
+            this.list.replaceWith(container)
+            this.list = container
+        } else {
+            this.list.innerHTML = "Вы ничего не нашли"
+        }
     }
 }
 
@@ -740,11 +822,13 @@ const loggerControl = {
 }
 
 
+
+
 document.addEventListener("DOMContentLoaded", function () {
     gridControl.createGrid();
     navigationControl.init();
     slideControl.init();
     roleControl.init();
     popupControl.init();
-    
+    gameControl.init();
 });

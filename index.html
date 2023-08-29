@@ -17,7 +17,11 @@
         <header class="header">
             <div class="container">
                 <div class="header__inner">
-                    <img src="images/logo.svg" alt="" class="logo">
+                    
+                    <picture>
+                        <source srcset="images/logo-small.svg" media="(max-width: 639px)">
+                        <img src="images/logo.svg" alt="" class="logo">
+                    </picture>
                     <button class="btn btn--inversion js-open-popup" data-popup="rules">Правила</button>
                 </div>
             </div>
@@ -75,24 +79,27 @@
                 <div class="slide" data-slide="2">
 
                     <div class="slide__row">
-                        <div class="slide__col align-bottom">
+                        <div class="slide__col align-bottom slide__col--logger">
                             <div class="logger">
                                 <img src="images/info.png" alt="" class="logger__icon">
                                 <div class="logger__list">
                                 </div>
                             </div>
                         </div>
-                        <div class="slide__col">
-                            <div class="labyrinth-wrapper">
+                        <div class="slide__col slide__col--labyrinth">
+                            <div class="labyrinth-col">
+                                <div class="labyrinth-wrapper">
 
-                            </div>
-                            <div class="health">
-                                <div class="health__indicator">Состояние черепа:&nbsp;<span class="js-health-state"></span>
+                                </div>
+                                <div class="health">
+                                    <div class="health__indicator">Состояние черепа:&nbsp;<span class="js-health-state"></span>
+                                    </div>
                                 </div>
                             </div>
+
                         </div>
 
-                        <div class="slide__col align-center">
+                        <div class="slide__col align-center slide__col--navigation">
                             <div class="navigation">
                                 <div class="navigation__row">
                                     <button class="navigation__btn js-move-btn" data-move="up">
@@ -139,6 +146,28 @@
 
 
                 </div>
+                <div class="popup popup--small" data-popup="result">
+                    <button class="popup__close">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-x-lg" viewBox="0 0 16 16">
+                            <path
+                                d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
+                        </svg>
+                    </button>
+    
+                    <div class="popup__inner">
+                        <h3 class="popup__title">
+                            Игра окончена!
+                        </h3>
+                        <div class="treasures">
+    
+                        </div>
+                        <div class="tcenter">
+                            <button class="btn js-game-restart">Начать заного</button>
+                        </div>
+                        
+                    </div>
+                </div>
                 <div class="popup popup--small" data-popup="item">
                     <button class="popup__close">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -152,7 +181,7 @@
                         <h3 class="popup__title">
                             Вы обнаружили предмет
                         </h3>
-                        <div class="item briefcase">
+                        <div class="item">
     
                         </div>
                     </div>
@@ -201,19 +230,26 @@
                             <p>
                                 В деревне Тал Раша существуют мирные люди. Раньше это была торговая деревня, с сотней жителей, но из-за индустриализации все разъехались, и в деревне живет совсем немного жителей:
                             </p>
-                            <p>
+                            <p class="rules__row">
+                                <img src="images/sherif.png" alt="" class="rules__role">
                                 шериф Тираель и его гвардия
                             </p>
-                            <p>
+                            <p class="rules__row">
+                                <img src="images/role-1.png" alt="" class="rules__role">
                                 медик Акара
                             </p>
-                            <p>
+                            <p class="rules__row">
+                                <img src="images/role-4.png" alt="" class="rules__role">
                                 офицер Дрогнан 
                             </p>
-                            <p>
+                            <p class="rules__row">
+                                <img src="images/role-3.png" alt="" class="rules__role">
                                 военный Мешиф
                             </p>
-                            <p>фокусник Соркесс</p>
+                            <p class="rules__row">
+                                <img src="images/role-2.png" alt="" class="rules__role">
+                                фокусник Соркесс
+                            </p>
                             <p>
                                 Со времен войны орков против людей в городе существует подземелье, которое позволяло жителям тайно покидать свои дома во время войны, чтобы сохранить свои жизни, но последняя война была очень давно. А после войны во времена сухого закона через подземелье в город тайно проносили контрабанду. 
                             </p>
@@ -246,8 +282,8 @@
                             </ul>
                             <p>
                                 После выбора персонажа игра начинается.<br>
-Игра начинается в подземелье: суть игры состоит в том, чтобы дойти до конца лабиринта и найти все сокровища.<br>
-В процессе игры вам предстоит найти предметы, которые расположены в определенных участках карты.
+                                Игра начинается в подземелье: суть игры состоит в том, чтобы дойти до конца лабиринта и найти все сокровища.<br>
+                                В процессе игры вам предстоит найти предметы, которые расположены в определенных участках карты.
                             </p>
                             <h3 class="rules__title">
                                 Базовые действия
@@ -341,7 +377,7 @@
         </main>
         <footer class="footer">
             <div class="container">
-
+                Не переживайте! Ваши права никоим образом не защищены!
             </div>
         </footer>
 
