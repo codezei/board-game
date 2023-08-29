@@ -1212,6 +1212,17 @@ white-space: nowrap;
     border-radius: 5px;
 }
 
+.treasure__item.treasure:before {
+    border: 1px solid #B77A72;
+    background: #EECCBE;
+    box-shadow: 0px -3px 4px 0px #B77A72 inset;
+    background-image: url(../images/treasure.png);
+    background-size: 50%;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 5px;
+}
+
 
 @media screen and (max-height: 1079px) {
     .header {
