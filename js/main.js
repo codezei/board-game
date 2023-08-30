@@ -48,7 +48,6 @@ const roleControl = {
         this.activeRole = {...this.roles[+e.currentTarget.dataset.role], treasures: []};
         healthControl.init();
         loggerControl.addMessage(`Вы выбрали персонаж: ${this.activeRole.name}`)
-        console.log(this.activeRole)
     },
     foundFlashlight () {
         this.activeRole.flashlight = true
@@ -101,24 +100,20 @@ const levelsState = {
                     moves: ["up"], 
                     target: false,
                     open: false, 
-                    item: {
+                    trap: {
                         id: "upstairs", 
                         name: "Подняться наверх", 
                         opened: false, 
-                        useItem(){
-                            this.opened = true
-                            itemControl.createItem(this.id)
-                            gameProcess.changeLevel(1)
-                            loggerControl.addMessage(`Вы вернулись на первый уровень`)
-                            gridControl.updateGrid()
-                        },
-                        openItem(){
-                            if (!this.opened && !roleControl.activeRole.solution) {
-                                puzzleControl.createPuzzle(this.useItem.bind(this))
-                            } else if (!this.opened && roleControl.activeRole.solution) {
-                                this.useItem()
+                        useTrap () {
+                            if (!this.opened) {
+                                gameProcess.changeLevel(1)
+                                loggerControl.addMessage(`Ваш персонаж выбрался на базовый этаж, где есть свет. Приключения продолжаются.`)
+                                // gameProcess.lightOn()
+
                             }
-                        }
+                            this.opened = true
+                        },
+                        
                     }
                 }, 
                 null
@@ -167,17 +162,23 @@ const levelsState = {
                         id: "treasure", 
                         name: "Сокровище", 
                         opened: false, 
+                        checked: false,
                         useItem(){
                             this.opened = true
                             itemControl.createItem(this.id)
                             roleControl.foundTreasure({id: this.id, name: this.name})
-                            loggerControl.addMessage(`Вы нашли предмет: Сокровище`)
+                            loggerControl.addMessage(`Вы что-то нашли: Сокровище`)
                             gridControl.updateGrid()
+                            
+                        },
+                        getChecked() {
+                            this.checked = true
                         },
                         openItem(){
-                            if (!this.opened && !roleControl.activeRole.solution) {
-                                puzzleControl.createPuzzle(this.useItem.bind(this))
-                            } else if (!this.opened && roleControl.activeRole.solution) {
+                            if (!this.opened && !roleControl.activeRole.solution && !this.checked) {
+                                puzzleControl.createPuzzle(this.useItem.bind(this), this.getChecked.bind(this))
+                            } else if (!this.opened && roleControl.activeRole.solution && !this.checked) {
+                                loggerControl.addMessage(`Фокусник использовал свою магию и открыл комнату без головоломки.`)
                                 this.useItem()
                                 
                             }
@@ -223,17 +224,23 @@ const levelsState = {
                         id: "briefcase", 
                         name: "Чемоданчик", 
                         opened: false, 
+                        checked: false,
                         useItem(){
                             this.opened = true
                             itemControl.createItem(this.id)
                             roleControl.foundTreasure({id: this.id, name: this.name})
                             loggerControl.addMessage(`Вы нашли предмет: Чемоданчик`)
                             gridControl.updateGrid()
+                            
+                        },
+                        getChecked() {
+                            this.checked = true
                         },
                         openItem(){
-                            if (!this.opened && !roleControl.activeRole.solution) {
-                                puzzleControl.createPuzzle(this.useItem.bind(this))
-                            } else if (!this.opened && roleControl.activeRole.solution) {
+                            if (!this.opened && !roleControl.activeRole.solution && !this.checked) {
+                                puzzleControl.createPuzzle(this.useItem.bind(this), this.getChecked.bind(this))
+                            } else if (!this.opened && roleControl.activeRole.solution && !this.checked) {
+                                loggerControl.addMessage(`Фокусник использовал свою магию и открыл комнату без головоломки.`)
                                 this.useItem()
                             }
                         }
@@ -249,17 +256,23 @@ const levelsState = {
                         id: "flashlight", 
                         name: "Фонарик", 
                         opened: false, 
+                        checked: false,
                         useItem(){
                             this.opened = true
                             itemControl.createItem(this.id)
                             roleControl.foundFlashlight()
                             loggerControl.addMessage(`Вы нашли предмет: Фонарик`)
                             gridControl.updateGrid()
+                            
+                        },
+                        getChecked() {
+                            this.checked = true
                         },
                         openItem(){
-                            if (!this.opened && !roleControl.activeRole.solution) {
-                                puzzleControl.createPuzzle(this.useItem.bind(this))
-                            } else if (!this.opened && roleControl.activeRole.solution) {
+                            if (!this.opened && !roleControl.activeRole.solution && !this.checked) {
+                                puzzleControl.createPuzzle(this.useItem.bind(this), this.getChecked.bind(this))
+                            } else if (!this.opened && roleControl.activeRole.solution && !this.checked) {
+                                loggerControl.addMessage(`Фокусник использовал свою магию и открыл комнату без головоломки.`)
                                 this.useItem()
                             }
                         }
@@ -277,25 +290,6 @@ const levelsState = {
                 null,
                 {
                     moves: ["up"], target: false, open: false,
-                    item: {
-                        id: "lightOn", 
-                        name: "Включить свет", 
-                        opened: false, 
-                        useItem(){
-                            this.opened = true
-                            itemControl.createItem(this.id)
-                            gameProcess.lightOn()
-                            loggerControl.addMessage(`Вы включили свет на текущем уровне`)
-                            gridControl.updateGrid()
-                        },
-                        openItem(){
-                            if (!roleControl.activeRole.solution) {
-                                puzzleControl.createPuzzle(this.useItem.bind(this))
-                            } else if (roleControl.activeRole.solution) {
-                                this.useItem()
-                            }
-                        }
-                    }
                 },
                 null,
             ],
@@ -305,30 +299,28 @@ const levelsState = {
                     moves: ["left", "right", "bottom"], 
                     target: false, 
                     open: false,
-                    item: {
+                    trap: {
                         id: "lightOff", 
                         name: "Выключить свет", 
                         opened: false, 
-                        useItem(){
+                        useTrap () {
+                            if (!this.opened) {
+                                gameProcess.changeLevel(0)
+                                loggerControl.addMessage(`О нет! Вы провалились сквозь гнилые доски в очередной тоннель. Здесь кромешная тьма!`)
+                                if (roleControl.activeRole.flashlight) {
+                                    if (roleControl.activeRole.id === 'military') {
+                                        loggerControl.addMessage(`Ваш персонаж не нашел фонарик и воспользовался ПНВ.`)
+                                    } else {
+                                        loggerControl.addMessage(`Ваш персонаж испугался, и достал фонарик.`)
+                                    }
+                                    gameProcess.lightOn()
+                                } else {
+                                    loggerControl.addMessage(`Налетели летучие мыши и съели персонажа.`)
+                                    gameControl.gameOver()
+                                }
+                            }
                             this.opened = true
-                            itemControl.createItem(this.id)
-                            gameProcess.lightOff()
-                            loggerControl.addMessage(`Вы выключили свет на текущем уровне`)
-                            gameProcess.changeLevel(0)
-                            loggerControl.addMessage(`Вы провалились в подвал. Найдите путь обратно`)
-                            gridControl.updateGrid()
-                            if (roleControl.activeRole.flashlight) {
-                                loggerControl.addMessage(`Вы использовали способность и включили фонарик`)
-                                gameProcess.lightOn()
-                                gridControl.updateGrid()
-                            }
-                        },
-                        openItem(){
-                            if (!this.opened && !roleControl.activeRole.solution) {
-                                puzzleControl.createPuzzle(this.useItem.bind(this))
-                            } else if (!this.opened && roleControl.activeRole.solution) {
-                                this.useItem()
-                            }
+
                         }
                     }
                 },
@@ -425,8 +417,9 @@ const healthControl = {
         this.storage.parentElement.setAttribute('class', `health__indicator health__indicator--${this.value}`)
         setTimeout(function() {
             this.storage.parentElement.classList.add('animate')
-        }.bind(this), 11)
+        }.bind(this), 1)
         loggerControl.addMessage(`Ваше здоровья установленно до: ${this.description[this.value]}`)
+
     },
     updateHealthState() {
         this.value++;
@@ -434,6 +427,8 @@ const healthControl = {
         if (this.value === this.description.length - 1) {
             loggerControl.addMessage(`Вы погибли`)
             gameControl.gameOver()
+        } else if (this.value === 5) {
+            loggerControl.addMessage(`Медик использовал свою способность и использовал дополнительную жизнь`)
         }
     },
     init () {
@@ -452,7 +447,6 @@ const navigationControl = {
             button.addEventListener("click", function (e) {
                 let direction = e.target.dataset.move;
                 gameProcess.changeTarget(direction);
-                gridControl.updateGrid();
             });
         });
         this.inspectionBtn.addEventListener("click", gameProcess.inspectionTarget.bind(gameProcess));
@@ -467,9 +461,7 @@ const gameControl = {
     finish: false,
     gameStart () {
         gameProcess.init()
-        levelsState.changeActiveLevel(1);
-        gridControl.updateGrid()
-        loggerControl.addMessage(`Вы начали игру`)
+        loggerControl.addMessage(`Игра началась!`)
     },
     gameRestart () {
         this.finish = false
@@ -494,8 +486,29 @@ const gameProcess = {
     state: levelsState,
     inspectionAttempts: 6,
     finish: gameControl.finish,
+    scheme: {
+        up: {
+            row: -1,
+            col: 0,
+            logger: "вверх"
+        },
+        down: {
+            row: 1,
+            col: 0,
+            logger: "вниз"
+        },
+        left: {
+            row: 0,
+            col: -1,
+            logger: "влево"
+        },
+        right: {
+            row: 0,
+            col: 1,
+            logger: "вправо"
+        }
+    },
     findTarget (levels) {
-        if (gameControl.finish) return
         let foundItem = {}
         levels.forEach((levelItem, levelIndex)=>{
                 if (levelIndex === this.state.activeLevel) {
@@ -512,66 +525,54 @@ const gameProcess = {
                     })
                 }
         })
+
         return foundItem
+    },
+    changeOpen () {
+        let newState = [...this.state.levels]
+        let {levelIndex, rowIndex, colIndex, colItem} = this.findTarget(newState)
+        let visibilityRooms = (roleControl.activeRole?.foresight && 2) || 1
+        for (let i = 1; i <= visibilityRooms; i++) {
+            for (let key in this.scheme) {
+                if (newState[levelIndex] && newState[levelIndex][rowIndex + this.scheme[key].row * i] && newState[levelIndex][rowIndex + this.scheme[key].row * i][colIndex + this.scheme[key].col * i]) {
+                    newState[levelIndex][rowIndex + this.scheme[key].row * i][colIndex + this.scheme[key].col * i].open = true
+                }
+            }
+        }
+        this.state.setState(newState);
+        gridControl.updateGrid()
     },
     changeTarget(direction) {
         if (gameControl.finish) return
         let newState = [...this.state.levels]
         let {levelIndex, rowIndex, colIndex, colItem} = this.findTarget(newState)
-        let loggerScheme = {
-            up: "вверх",
-            down: "вниз",
-            left: "влево",
-            right: "вправо"
-        }
         if (colItem.moves.includes(direction)) {
             colItem.target = false
-            if (direction === "up") {
-                newState[levelIndex][rowIndex - 1][colIndex].target = true
-                newState[levelIndex][rowIndex - 1][colIndex].open = true
-                roleControl.activeRole.foresight && newState[levelIndex][rowIndex - 2][colIndex] && (newState[levelIndex][rowIndex - 2][colIndex].open = true)
-                loggerControl.addMessage(`Успешное перемещение ${loggerScheme[direction]}`)
-                if (newState[levelIndex][rowIndex - 1][colIndex].end) {
-                    loggerControl.addMessage(`Вы нашли конец лабиринта`)
-                    gameControl.gameOver()
-                    
+            let currentCol = newState[levelIndex][rowIndex + this.scheme[direction].row][colIndex + this.scheme[direction].col]
+            if (currentCol) {
+                currentCol.target = true
+                loggerControl.addMessage(`Успешное перемещение ${this.scheme[direction].logger}`)
+                if (currentCol.trap) {
+                    currentCol.trap.useTrap()
                 }
-            } else if (direction === "down") {
-                newState[levelIndex][rowIndex + 1][colIndex].target = true
-                newState[levelIndex][rowIndex + 1][colIndex].open = true
-                roleControl.activeRole.foresight && newState[levelIndex][rowIndex + 2][colIndex] && (newState[levelIndex][rowIndex + 2][colIndex].open = true)
-                loggerControl.addMessage(`Успешное перемещение ${loggerScheme[direction]}`)
-                if (newState[levelIndex][rowIndex + 1][colIndex].end) {
+                if (currentCol.end) {
                     loggerControl.addMessage(`Вы нашли конец лабиринта`)
                     gameControl.gameOver()
                 }
-            } else if (direction === "left") {
-                newState[levelIndex][rowIndex][colIndex - 1].target = true
-                newState[levelIndex][rowIndex][colIndex - 1].open = true
-                roleControl.activeRole.foresight && newState[levelIndex][rowIndex][colIndex - 2] && (newState[levelIndex][rowIndex][colIndex - 2].open = true)
-                loggerControl.addMessage(`Успешное перемещение ${loggerScheme[direction]}`)
-                if (newState[levelIndex][rowIndex][colIndex - 1].end) {
-                    loggerControl.addMessage(`Вы нашли конец лабиринта`)
-                    gameControl.gameOver()
-                }
-            } else if (direction === "right") {
-                newState[levelIndex][rowIndex][colIndex + 1].target = true
-                newState[levelIndex][rowIndex][colIndex + 1].open = true
-                roleControl.activeRole.foresight && newState[levelIndex][rowIndex][colIndex + 2] && (newState[levelIndex][rowIndex][colIndex + 2].open = true)
-                loggerControl.addMessage(`Успешное перемещение ${loggerScheme[direction]}`)
-                if (newState[levelIndex][rowIndex][colIndex + 1].end) {
-                    loggerControl.addMessage(`Вы нашли конец лабиринта`)
-                    gameControl.gameOver()
-                }
+            } else {
+                loggerControl.addMessage(`Неудачное перемещение ${this.scheme[direction].logger}`)
+                healthControl.updateHealthState();
             }
         } else {
-            loggerControl.addMessage(`Неудачное перемещение ${loggerScheme[direction]}`)
+            loggerControl.addMessage(`Неверное направление, удар головой о стену!`)
             healthControl.updateHealthState();
         }
         this.state.setState(newState);
+        this.changeOpen()
+
+  
     },
     changeLevel(level) {
-        
         let newState = [...this.state.levels]
         let {rowIndex, colIndex, colItem} = this.findTarget(newState)
         colItem.target = false
@@ -620,14 +621,25 @@ const gameProcess = {
         }
         let newState = [...this.state.levels]
         let {colItem} = this.findTarget(newState)
+
         if (colItem.item) {
             colItem.item.openItem()
+            if (!colItem.item?.checked && !colItem.item.opened) {
+                loggerControl.addMessage(`Проводится обыск комнаты`)
+            } else if (colItem.item?.checked) {
+                loggerControl.addMessage(`Увы. Здесь вы смогли найти только песок и камни`)
+            }
+        } else {
+            loggerControl.addMessage(`Увы. Но здесь ничего нету`)
+            
         }
         this.state.setState(newState);
         this.inspectionAttempts = this.inspectionAttempts - 1
-        loggerControl.addMessage(`Вы иследовали комнату. Осталось ${this.inspectionAttempts} попыток`)
+        
+        // loggerControl.addMessage(`Вы иследовали комнату. Осталось ${this.inspectionAttempts} попыток`)
     },
     init () {
+        this.state.changeActiveLevel(1)
         this.inspectionAttempts = 6;
         let newState = [...this.state.levels];
         newState.forEach((levelItem, levelIndex)=>{
@@ -639,6 +651,9 @@ const gameProcess = {
                         if (colItem.item) {
                             colItem.item.opened = false
                         }
+                        if (colItem.trap) {
+                            colItem.trap.opened = false
+                        }
                         if (colItem.start) {
                             colItem.target = true
                             colItem.open = true
@@ -649,6 +664,8 @@ const gameProcess = {
             })
         })
         this.state.setState(newState)
+        this.changeOpen()
+        
     }
 };
 
@@ -725,7 +742,6 @@ const resultControl = {
     showResult () {
         
         if (roleControl.activeRole.treasures.length) {
-            console.log(roleControl.activeRole)
             let container = document.createElement('div')
             container.classList.add('treasures')
             container.innerHTML = "Вы нашли:"
@@ -765,16 +781,36 @@ const puzzleControl = {
     operatorValue: null,
     answerValue: null,
     successAnswerCallback: null,
+    errorAnswerCallback: null,
     popup: popupControl,
+    attempts: null,
     checkAnswerHandler (e) {
+
+        
+        if (e.key && e.key === "Enter") {
+            if (+e.target.value === this.answerValue) {
+                this.successAnswerCallback()
+                e.target.value = ''
+            } else {
+                this.attempts = this.attempts - 1
+                loggerControl.addMessage(`Неверній ответ. Осталось попыток: ${this.attempts}`)
+            }
+        }
+
         if (+e.target.value === this.answerValue) {
                 this.successAnswerCallback()
                 e.target.value = ''
+        }
 
+        if (this.attempts === 0) {
+            this.errorAnswerCallback()
+            this.popup.closePopupHandler()
+            loggerControl.addMessage(`У вас не осталось попыток на обыск комнаты`)
         }
     },
     checkAnswerListener () {
         this.answer.addEventListener('input', this.checkAnswerHandler.bind(this))
+        this.answer.addEventListener('keyup', this.checkAnswerHandler.bind(this))
     },
     
     setValues () {
@@ -797,15 +833,26 @@ const puzzleControl = {
     setSuccessAnswerCallback (callback) {
         this.successAnswerCallback = callback
     },
-    createPuzzle (successAnswerCallback) {
-        this.checkAnswerListener()
-        return (() => { 
+    setErrorAnswerCallback (callback) {
+        this.errorAnswerCallback = callback
+    },
+    createPuzzle (successAnswerCallback, errorAnswerCallback) {
+
+            if (this.attempts === 0) {
+                return
+            } else {
+                this.attempts = 3
+            }
             this.initValues()
             this.setValues()
             this.setSuccessAnswerCallback(successAnswerCallback)
+            this.setErrorAnswerCallback(errorAnswerCallback)
             this.popup.openPopup('puzzle')
-        }) ()
+     
 
+    },
+    init () {
+        this.checkAnswerListener ()
     }
 
 }
@@ -831,4 +878,5 @@ document.addEventListener("DOMContentLoaded", function () {
     roleControl.init();
     popupControl.init();
     gameControl.init();
+    puzzleControl.init()
 });
