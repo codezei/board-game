@@ -48,6 +48,7 @@ const roleControl = {
         this.activeRole = {...this.roles[+e.currentTarget.dataset.role], treasures: []};
         healthControl.init();
         loggerControl.addMessage(`Вы выбрали персонаж: ${this.activeRole.name}`)
+        gameControl.init()
     },
     foundFlashlight () {
         this.activeRole.flashlight = true
@@ -100,6 +101,7 @@ const levelsState = {
                     moves: ["up"], 
                     target: false,
                     open: false, 
+                    upstairs: true,
                     trap: {
                         id: "upstairs", 
                         name: "Подняться наверх", 
@@ -108,8 +110,6 @@ const levelsState = {
                             if (!this.opened) {
                                 gameProcess.changeLevel(1)
                                 loggerControl.addMessage(`Ваш персонаж выбрался на базовый этаж, где есть свет. Приключения продолжаются.`)
-                                // gameProcess.lightOn()
-
                             }
                             this.opened = true
                         },
@@ -145,6 +145,7 @@ const levelsState = {
                     moves: ["up", "down"], 
                     target: false,
                     open: false, 
+                    reverse: true
                 }, 
                 null, 
                 null, 
@@ -158,11 +159,14 @@ const levelsState = {
                     moves: ["up"], 
                     target: false,
                     open: false, 
-                    item: {
+                    treasure: true,
+                    trap: {
                         id: "treasure", 
                         name: "Сокровище", 
                         opened: false, 
-                        checked: false,
+                        useTrap () {
+                            this.useItem()
+                        },
                         useItem(){
                             this.opened = true
                             itemControl.createItem(this.id)
@@ -170,18 +174,6 @@ const levelsState = {
                             loggerControl.addMessage(`Вы что-то нашли: Сокровище`)
                             gridControl.updateGrid()
                             
-                        },
-                        getChecked() {
-                            this.checked = true
-                        },
-                        openItem(){
-                            if (!this.opened && !roleControl.activeRole.solution && !this.checked) {
-                                puzzleControl.createPuzzle(this.useItem.bind(this), this.getChecked.bind(this))
-                            } else if (!this.opened && roleControl.activeRole.solution && !this.checked) {
-                                loggerControl.addMessage(`Фокусник использовал свою магию и открыл комнату без головоломки.`)
-                                this.useItem()
-                                
-                            }
                         }
                     }
                 }, 
@@ -279,7 +271,7 @@ const levelsState = {
                     } 
                 },
                 { moves: ["left", "right"], target: false, open: false },
-                { moves: ["left", "right", "down"], target: false, open: false },
+                { moves: ["left", "right"], target: false, open: false },
                 { moves: ["left", "up"], target: false, open: false },
             ],
             [
@@ -288,9 +280,7 @@ const levelsState = {
                 null,
                 { moves: ["up", "down"], target: false, open: false },
                 null,
-                {
-                    moves: ["up"], target: false, open: false,
-                },
+                null,
                 null,
             ],
             [
@@ -314,7 +304,15 @@ const levelsState = {
                                         loggerControl.addMessage(`Ваш персонаж испугался, и достал фонарик.`)
                                     }
                                     gameProcess.lightOn()
-                                } else {
+                                } else if (roleControl.activeRole.id === 'magician') {
+                                    loggerControl.addMessage(`Фокусник почувствовал опасность и испарился из тоннеля на поверхность без факта смерти.`)
+                                    document.body.classList.add('magic')
+                                    setTimeout(function () {
+                                        gameControl.gameRestart()
+                                        document.body.classList.remove('magic')
+                                    }, 3000)
+                                    
+                                }  else {
                                     loggerControl.addMessage(`Налетели летучие мыши и съели персонажа.`)
                                     gameControl.gameOver()
                                 }
@@ -365,6 +363,9 @@ const gridControl = {
                     colItem && colItem.end && colHtml.classList.add("end");
                     colItem && colItem.open && colHtml.classList.add("open");
                     colItem && colItem.target && colHtml.classList.add("target");
+                    colItem && colItem.upstairs && colHtml.classList.add("upstairs");
+                    colItem && colItem.treasure && colHtml.classList.add("treasure");
+                    colItem && colItem.reverse && colHtml.classList.add("reverse");
                     rowHtml.append(colHtml);
                 });
                 levelHtml.append(rowHtml);
@@ -398,18 +399,30 @@ const healthControl = {
     description: [
         "Целехонький",
         "Легкий ушиб",
-        "Средняя травма",
-        "Тяжелая травма",
-        "Сотрясение мозга",
+        "Небольшая шишка",
+        "Гематома с кулак",
         "Разбит",
     ],
     value: 0,
     storage: document.querySelector(".js-health-state"),
     setDescription () {
         if (this.role.activeRole.id === "medic") {
-            this.description = [...this.description, ...this.description,]
+            this.description = [
+                "Целехонький",
+                "Легкий ушиб",
+                "Небольшая шишка",
+                "Гематома с кулак",
+                "Сотрясение мозга",
+                "Разбит",
+            ]
         } else {
-            this.description = [...this.description]
+            this.description = [
+                "Целехонький",
+                "Легкий ушиб",
+                "Небольшая шишка",
+                "Гематома с кулак",
+                "Разбит",
+            ]
         }
     },
     setHealthState() {
@@ -427,7 +440,7 @@ const healthControl = {
         if (this.value === this.description.length - 1) {
             loggerControl.addMessage(`Вы погибли`)
             gameControl.gameOver()
-        } else if (this.value === 5) {
+        } else if (this.value === 4) {
             loggerControl.addMessage(`Медик использовал свою способность и использовал дополнительную жизнь`)
         }
     },
@@ -577,8 +590,14 @@ const gameProcess = {
         let {rowIndex, colIndex, colItem} = this.findTarget(newState)
         colItem.target = false
         this.state.changeActiveLevel(level)
-        newState[this.state.activeLevel][rowIndex][colIndex].target = true
-        newState[this.state.activeLevel][rowIndex][colIndex].open = true
+        if (level === 1) {
+            newState[this.state.activeLevel][rowIndex - 1][colIndex].target = true
+            newState[this.state.activeLevel][rowIndex - 1][colIndex].open = true
+        } else {
+            newState[this.state.activeLevel][rowIndex][colIndex].target = true
+            newState[this.state.activeLevel][rowIndex][colIndex].open = true
+        }
+
         this.state.setState(newState);
         gridControl.updateGrid()
 
@@ -664,8 +683,8 @@ const gameProcess = {
             })
         })
         this.state.setState(newState)
+
         this.changeOpen()
-        
     }
 };
 
@@ -702,6 +721,7 @@ const popupControl = {
     popups: document.querySelectorAll('.popup'),
     buttons: document.querySelectorAll('.js-open-popup'),
     activePopup: null,
+    delayClosePopup: null,
     addListeners(){
         this.buttons.forEach((button) => {
             button.addEventListener("click", this.openPopupHandler.bind(this));
@@ -709,11 +729,19 @@ const popupControl = {
         this.popups.forEach((popup)=>{
             popup.querySelector('.popup__close').addEventListener('click', this.closePopupHandler.bind(this))
         })
+        document.addEventListener('keyup', function (e) {
+            if (e.key && e.key === "Escape") {
+                popupControl.closePopupHandler()
+            }
+        })
     },
     openPopupHandler(e) {
         this.openPopup(e.currentTarget.dataset.popup)
     },
     openPopup(typePopup) {
+        if (this.delayClosePopup) {
+            clearTimeout(this.delayClosePopup)
+        }
         if (this.activePopup) {
             this.activePopup.classList.remove('open')
             this.activePopup = null
@@ -725,11 +753,19 @@ const popupControl = {
                 this.activePopup.classList.add('open')
             }
         })
+
+        if (typePopup === "item") {
+            this.delayClosePopup = setTimeout(function () {
+                this.closePopupHandler()
+            }.bind(this), 5000)
+        }
     },
-    closePopupHandler() {
-        this.activePopup.classList.remove('open')
-        this.activePopup = null
-        
+    closePopupHandler(e) {
+        if (this.activePopup) {
+            this.activePopup.classList.remove('open')
+            this.activePopup = null
+        }
+
     },
 
     init() {
@@ -794,6 +830,10 @@ const puzzleControl = {
             } else {
                 this.attempts = this.attempts - 1
                 loggerControl.addMessage(`Неверній ответ. Осталось попыток: ${this.attempts}`)
+                this.initValues()
+                this.setValues()
+                e.target.value = ''
+
             }
         }
 
@@ -819,9 +859,16 @@ const puzzleControl = {
         this.operator.innerHTML = this.operatorValue
     }, 
     initValues () {
-        this.operandFirstValue = Math.floor(Math.random() * 100)
-        this.operandSecondValue = Math.floor(Math.random() * 100)
         this.operatorValue = this.operators[Math.round(Math.random() * (this.operators.length - 1))]
+        this.operandFirstValue = Math.floor(Math.random() * 100)
+        if (this.operatorValue === "*") {
+            this.operandSecondValue = Math.floor(Math.random() * 5)
+        } else if (this.operatorValue === "-") {
+            this.operandSecondValue = Math.floor(Math.random() * this.operandFirstValue)
+        } else {
+            this.operandSecondValue = Math.floor(Math.random() * 100)
+        }
+        
         if (this.operatorValue === "*") {
             this.answerValue = this.operandFirstValue * this.operandSecondValue
         } else if (this.operatorValue === "+") {    
@@ -829,6 +876,7 @@ const puzzleControl = {
         } else if (this.operatorValue === "-") {    
             this.answerValue = this.operandFirstValue - this.operandSecondValue
         }
+
     },
     setSuccessAnswerCallback (callback) {
         this.successAnswerCallback = callback
@@ -877,6 +925,6 @@ document.addEventListener("DOMContentLoaded", function () {
     slideControl.init();
     roleControl.init();
     popupControl.init();
-    gameControl.init();
+    // gameControl.init();
     puzzleControl.init()
 });
